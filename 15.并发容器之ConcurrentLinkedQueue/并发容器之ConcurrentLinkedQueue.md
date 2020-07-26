@@ -12,7 +12,7 @@
 			.......
 	}
 
-Node节点主要包含了两个域：一个是数据域item，另一个是next指针，用于指向下一个节点从而构成链式队列。并且都是用volatile进行修饰的，以保证内存可见性（关于volatile[可以看这篇文章](https://juejin.im/post/5ae9b41b518825670b33e6c4)）。另外ConcurrentLinkedQueue含有这样两个成员变量：
+Node节点主要包含了两个域：一个是数据域item，另一个是next指针，用于指向下一个节点从而构成链式队列。并且都是用volatile进行修饰的，以保证内存可见性（关于volatile[可以看这篇文章](https://juejin.im/post/5ae9b41b518825670b33e6c4) ）。另外ConcurrentLinkedQueue含有这样两个成员变量：
 
 	private transient volatile Node<E> head;
 	private transient volatile Node<E> tail;
@@ -34,7 +34,7 @@ head和tail指针会指向一个item域为null的节点,此时ConcurrentLinkedQu
 
 
 ## 1.2 操作Node的几个CAS操作  ##
-在队列进行出队入队的时候免不了对节点需要进行操作，在多线程就很容易出现线程安全的问题。可以看出在处理器指令集能够支持**CMPXCHG**指令后，在java源码中涉及到并发处理都会使用CAS操作[(关于CAS操作可以看这篇文章的第3.1节](https://juejin.im/post/5ae6dc04f265da0ba351d3ff))，那么在ConcurrentLinkedQueue对Node的CAS操作有这样几个：
+在队列进行出队入队的时候免不了对节点需要进行操作，在多线程就很容易出现线程安全的问题。可以看出在处理器指令集能够支持**CMPXCHG**指令后，在java源码中涉及到并发处理都会使用CAS操作[(关于CAS操作可以看这篇文章的第3.1节](https://juejin.im/post/5ae6dc04f265da0ba351d3ff) )，那么在ConcurrentLinkedQueue对Node的CAS操作有这样几个：
 
 	//更改Node中的数据域item	
 	boolean casItem(E cmp, E val) {
@@ -54,6 +54,7 @@ head和tail指针会指向一个item域为null的节点,此时ConcurrentLinkedQu
 # 2.offer方法 #
 对一个队列来说，插入满足FIFO特性，插入元素总是在队列最末尾的地方进行插入，而取（移除）元素总是从队列的队头。所有要想能够彻底弄懂ConcurrentLinkedQueue自然而然是从offer方法和poll方法开始。那么为了能够理解offer方法，采用debug的方式来一行一行的看代码走。另外，在看多线程的代码时，可采用这样的思维方式：
 
+```
 > **单个线程offer**
 > **多个线程offer**
 > **部分线程offer，部分线程poll**
@@ -61,6 +62,7 @@ head和tail指针会指向一个item域为null的节点,此时ConcurrentLinkedQu
 > --------队列长度会越来越长，由于offer节点总是在对队列队尾，而poll节点总是在队列对头，也就是说offer线程和poll线程两者并无“交集”，也就是说两类线程间并不会相互影响，这种情况站在相对速率的角度来看，也就是一个"单线程offer"
 > ----offer的速度慢于poll
 > --------poll的相对速率快于offer，也就是队头删的速度要快于队尾添加节点的速度，导致的结果就是队列长度会越来越短，而offer线程和poll线程就会出现“交集”，即那一时刻就可以称之为offer线程和poll线程同时操作的节点为 **临界点** ，且在该节点offer线程和poll线程必定相互影响。根据在临界点时offer和poll发生的相对顺序又可从两个角度去思考：**1. 执行顺序为offer-->poll-->offer**，即表现为当offer线程在Node1后插入Node2时，此时poll线程已经将Node1删除，这种情况很显然需要在offer方法中考虑； **2.执行顺序可能为：poll-->offer-->poll**，即表现为当poll线程准备删除的节点为null时（队列为空队列），此时offer线程插入一个节点使得队列变为非空队列
+```
 
 
 先看这么一段代码：

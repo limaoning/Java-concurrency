@@ -1,11 +1,11 @@
 
 # 1. ArrayBlockingQueue简介 #
 
-在多线程编程过程中，为了业务解耦和架构设计，经常会使用并发容器用于存储多线程间的共享数据，这样不仅可以保证线程安全，还可以简化各个线程操作。例如在“生产者-消费者”问题中，会使用阻塞队列（BlockingQueue）作为数据容器，关于BlockingQueue可以[看这篇文章](https://juejin.im/post/5aeebd02518825672f19c546)。为了加深对阻塞队列的理解，唯一的方式是对其实验原理进行理解，这篇文章就主要来看看ArrayBlockingQueue和LinkedBlockingQueue的实现原理。
+在多线程编程过程中，为了业务解耦和架构设计，经常会使用并发容器用于存储多线程间的共享数据，这样不仅可以保证线程安全，还可以简化各个线程操作。例如在“生产者-消费者”问题中，会使用阻塞队列（BlockingQueue）作为数据容器，关于BlockingQueue可以[看这篇文章](https://juejin.im/post/5aeebd02518825672f19c546) 。为了加深对阻塞队列的理解，唯一的方式是对其实验原理进行理解，这篇文章就主要来看看ArrayBlockingQueue和LinkedBlockingQueue的实现原理。
 
 # 2. ArrayBlockingQueue实现原理 #
 
-阻塞队列最核心的功能是，能够可阻塞式的插入和删除队列元素。当前队列为空时，会阻塞消费数据的线程，直至队列非空时，通知被阻塞的线程；当队列满时，会阻塞插入数据的线程，直至队列未满时，通知插入数据的线程（生产者线程）。那么，多线程中消息通知机制最常用的是lock的condition机制，关于condition可以[看这篇文章的详细介绍](https://juejin.im/post/5aeea5e951882506a36c67f0)。那么ArrayBlockingQueue的实现是不是也会采用Condition的通知机制呢？下面来看看。
+阻塞队列最核心的功能是，能够可阻塞式的插入和删除队列元素。当前队列为空时，会阻塞消费数据的线程，直至队列非空时，通知被阻塞的线程；当队列满时，会阻塞插入数据的线程，直至队列未满时，通知插入数据的线程（生产者线程）。那么，多线程中消息通知机制最常用的是lock的condition机制，关于condition可以[看这篇文章的详细介绍](https://juejin.im/post/5aeea5e951882506a36c67f0) 。那么ArrayBlockingQueue的实现是不是也会采用Condition的通知机制呢？下面来看看。
 
 ## 2.1 ArrayBlockingQueue的主要属性 
 

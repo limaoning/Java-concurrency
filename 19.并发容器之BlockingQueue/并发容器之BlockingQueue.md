@@ -1,6 +1,6 @@
 
 # 1. BlockingQueue简介 #
-在实际编程中，会经常使用到JDK中Collection集合框架中的各种容器类如实现List,Map,Queue接口的容器类，但是这些容器类基本上不是线程安全的，除了使用Collections可以将其转换为线程安全的容器，Doug Lea大师为我们都准备了对应的线程安全的容器，如实现List接口的CopyOnWriteArrayList（[关于CopyOnWriteArrayList可以看这篇文章](https://juejin.im/post/5aeeb55f5188256715478c21)），实现Map接口的ConcurrentHashMap（[关于ConcurrentHashMap可以看这篇文章](https://juejin.im/post/5aeeaba8f265da0b9d781d16)），实现Queue接口的ConcurrentLinkedQueue（[关于ConcurrentLinkedQueue可以看这篇文章](https://juejin.im/post/5aeeae756fb9a07ab11112af)）。
+在实际编程中，会经常使用到JDK中Collection集合框架中的各种容器类如实现List,Map,Queue接口的容器类，但是这些容器类基本上不是线程安全的，除了使用Collections可以将其转换为线程安全的容器，Doug Lea大师为我们都准备了对应的线程安全的容器，如实现List接口的CopyOnWriteArrayList（[关于CopyOnWriteArrayList可以看这篇文章](https://juejin.im/post/5aeeb55f5188256715478c21) ），实现Map接口的ConcurrentHashMap（[关于ConcurrentHashMap可以看这篇文章](https://juejin.im/post/5aeeaba8f265da0b9d781d16) ），实现Queue接口的ConcurrentLinkedQueue（[关于ConcurrentLinkedQueue可以看这篇文章](https://juejin.im/post/5aeeae756fb9a07ab11112af) ）。
 
 最常用的"**生产者-消费者**"问题中，队列通常被视作线程间操作的数据容器，这样，可以对各个模块的业务功能进行解耦，生产者将“生产”出来的数据放置在数据容器中，而消费者仅仅只需要在“数据容器”中进行获取数据即可，这样生产者线程和消费者线程就能够进行解耦，只专注于自己的业务功能即可。阻塞队列（BlockingQueue）被广泛使用在“生产者-消费者”问题中，其原因是BlockingQueue提供了可阻塞的插入和移除的方法。**当队列容器已满，生产者线程会被阻塞，直到队列未满；当队列容器为空时，消费者线程会被阻塞，直至队列非空时为止。**
     
@@ -53,7 +53,7 @@ ArrayBlockingQueue默认情况下不能保证线程访问队列的公平性，�
 
     private static ArrayBlockingQueue<Integer> blockingQueue = new ArrayBlockingQueue<Integer>(10,true);
 
-关于ArrayBlockingQueue的实现原理，可以[看这篇文章](https://juejin.im/post/5aeebdb26fb9a07aa83ea17e)。
+关于ArrayBlockingQueue的实现原理，可以[看这篇文章](https://juejin.im/post/5aeebdb26fb9a07aa83ea17e) 。
 
 
 > 2.LinkedBlockingQueue

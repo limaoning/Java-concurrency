@@ -3,20 +3,24 @@
 
 
 
-在[上一篇文章](https://juejin.im/post/5aeb055b6fb9a07abf725c8c)中我们对lock和AbstractQueuedSynchronizer(AQS)有了初步的认识。在同步组件的实现中，AQS是核心部分，同步组件的实现者通过使用AQS提供的模板方法实现同步组件语义，AQS则实现了对**同步状态的管理，以及对阻塞线程进行排队，等待通知**等等一些底层的实现处理。AQS的核心也包括了这些方面:**同步队列，独占式锁的获取和释放，共享锁的获取和释放以及可中断锁，超时等待锁获取这些特性的实现**，而这些实际上则是AQS提供出来的模板方法，归纳整理如下：
+在[上一篇文章](https://juejin.im/post/5aeb055b6fb9a07abf725c8c) 中我们对lock和AbstractQueuedSynchronizer(AQS)有了初步的认识。在同步组件的实现中，AQS是核心部分，同步组件的实现者通过使用AQS提供的模板方法实现同步组件语义，AQS则实现了对**同步状态的管理，以及对阻塞线程进行排队，等待通知**等等一些底层的实现处理。AQS的核心也包括了这些方面:**同步队列，独占式锁的获取和释放，共享锁的获取和释放以及可中断锁，超时等待锁获取这些特性的实现**，而这些实际上则是AQS提供出来的模板方法，归纳整理如下：
 
 **独占式锁：**
 
+```
 > void acquire(int arg)：独占式获取同步状态，如果获取失败则插入同步队列进行等待；
 > void acquireInterruptibly(int arg)：与acquire方法相同，但在同步队列中进行等待的时候可以检测中断；
 > boolean tryAcquireNanos(int arg, long nanosTimeout)：在acquireInterruptibly基础上增加了超时等待功能，在超时时间内没有获得同步状态返回false;
 > boolean release(int arg)：释放同步状态，该方法会唤醒在同步队列中的下一个节点
+```
 
 **共享式锁：**
+```
 > void acquireShared(int arg)：共享式获取同步状态，与独占式的区别在于同一时刻有多个线程获取同步状态；
 > void acquireSharedInterruptibly(int arg)：在acquireShared方法基础上增加了能响应中断的功能；
 > boolean tryAcquireSharedNanos(int arg, long nanosTimeout)：在acquireSharedInterruptibly基础上增加了超时等待的功能；
 > boolean releaseShared(int arg)：共享式释放同步状态
+```
 
 
 要想掌握AQS的底层实现，其实也就是对这些模板方法的逻辑进行学习。在学习这些模板方法之前，我们得首先了解下AQS中的同步队列是一种什么样的数据结构，因为同步队列是AQS对同步状态的管理的基石。
@@ -26,19 +30,23 @@
 
 在AQS有一个静态内部类Node，其中有这样一些属性：
 
+```
 > volatile int waitStatus //节点状态
 > volatile Node prev //当前节点/线程的前驱节点
 > volatile Node next; //当前节点/线程的后继节点
 > volatile Thread thread;//加入同步队列的线程引用
 > Node nextWaiter;//等待队列中的下一个节点
+```
 
 节点的状态有以下这些：
 
+```
 > int CANCELLED =  1//节点从同步队列中取消
 > int SIGNAL    = -1//后继节点的线程处于等待状态，如果当前节点释放同步状态会通知后继节点，使得后继节点的线程能够运行；
 > int CONDITION = -2//当前节点进入等待队列中
 > int PROPAGATE = -3//表示下一次共享式同步状态获取将会无条件传播下去
 > int INITIAL = 0;//初始状态
+```
 
 现在我们知道了节点的数据结构类型，并且每个节点拥有其前驱和后继节点，很显然这是**一个双向队列**。同样的我们可以用一段demo看一下。
 
@@ -92,7 +100,7 @@ Thread-0先获得锁后进行睡眠，其他线程（Thread-1,Thread-2,Thread-3,
 # 3. 独占锁 #
 
 ## 3.1 独占锁的获取（acquire方法）
-我们继续通过看源码和debug的方式来看，还是以上面的demo为例，调用lock()方法是获取独占式锁，获取失败就将当前线程加入同步队列，成功则线程执行。而lock()方法实际上会调用AQS的**acquire()**方法，源码如下
+我们继续通过看源码和debug的方式来看，还是以上面的demo为例，调用lock()方法是获取独占式锁，获取失败就将当前线程加入同步队列，成功则线程执行。而lock()方法实际上会调用AQS的 **acquire()** 方法，源码如下
 
 	public final void acquire(int arg) {
 			//先看同步状态是否获取成功，如果成功则方法结束返回

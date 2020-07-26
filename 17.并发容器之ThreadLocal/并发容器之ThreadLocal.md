@@ -128,7 +128,7 @@ ThreadLocalMap是threadLocal一个静态内部类，和大多数容器一样内�
 	    }
 	}
 
-Entry是一个以ThreadLocal为key,Object为value的键值对，另外需要注意的是这里的**threadLocal是弱引用，因为Entry继承了WeakReference，在Entry的构造方法中，调用了super(k)方法就会将threadLocal实例包装成一个WeakReferenece。**到这里我们可以用一个图（下图来自http://blog.xiaohansong.com/2016/08/06/ThreadLocal-memory-leak/）来理解下thread,threadLocal,threadLocalMap，Entry之间的关系：
+Entry是一个以ThreadLocal为key,Object为value的键值对，另外需要注意的是这里的**threadLocal是弱引用，因为Entry继承了WeakReference，在Entry的构造方法中，调用了super(k)方法就会将threadLocal实例包装成一个WeakReferenece。**到这里我们可以用一个图（下图来自http://blog.xiaohansong.com/2016/08/06/ThreadLocal-memory-leak/） 来理解下thread,threadLocal,threadLocalMap，Entry之间的关系：
 
 ![ThreadLocal各引用间的关系](http://upload-images.jianshu.io/upload_images/2615789-12aef2e6ff040cae.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/610)
 
@@ -138,7 +138,7 @@ Entry是一个以ThreadLocal为key,Object为value的键值对，另外需要注�
 
 ## 3.2 set方法 ##
 
-与concurrentHashMap，hashMap等容器一样，threadLocalMap也是采用散列表进行实现的。在了解set方法前，我们先来回顾下关于散列表相关的知识（摘自[这篇的threadLocalMap的讲解部分](https://www.cnblogs.com/zhangjk1993/archive/2017/03/29/6641745.html)以及[这篇文章的hash](http://faculty.cs.niu.edu/~freedman/340/340notes/340hash.htm)）。
+与concurrentHashMap，hashMap等容器一样，threadLocalMap也是采用散列表进行实现的。在了解set方法前，我们先来回顾下关于散列表相关的知识（摘自[这篇的threadLocalMap的讲解部分](https://www.cnblogs.com/zhangjk1993/archive/2017/03/29/6641745.html) 以及[这篇文章的hash](http://faculty.cs.niu.edu/~freedman/340/340notes/340hash.htm) ）。
 
 
 
@@ -175,7 +175,7 @@ Entry是一个以ThreadLocal为key,Object为value的键值对，另外需要注�
 
 图片来自 http://alexyyek.github.io/2014/12/14/hashCollapse/
 
-关于两种方式的比较，可以参考 [这篇文章](http://www.nowamagic.net/academy/detail/3008060)。**ThreadLocalMap 中使用开放地址法来处理散列冲突**，而 HashMap 中使用的分离链表法。之所以采用不同的方式主要是因为：在 ThreadLocalMap 中的散列值分散的十分均匀，很少会出现冲突。并且 ThreadLocalMap 经常需要清除无用的对象，使用纯数组更加方便。
+关于两种方式的比较，可以参考 [这篇文章](http://www.nowamagic.net/academy/detail/3008060) 。**ThreadLocalMap 中使用开放地址法来处理散列冲突**，而 HashMap 中使用的分离链表法。之所以采用不同的方式主要是因为：在 ThreadLocalMap 中的散列值分散的十分均匀，很少会出现冲突。并且 ThreadLocalMap 经常需要清除无用的对象，使用纯数组更加方便。
 
 在了解这些相关知识后我们再回过头来看一下set方法。set方法的源码为：
 
@@ -231,7 +231,7 @@ set方法的关键部分**请看上面的注释**，主要有这样几点需要�
 	    private static int nextHashCode() {
 	        return nextHashCode.getAndAdd(HASH_INCREMENT);
 	    }
-	从源码中我们可以清楚的看到threadLocal实例的hashCode是通过nextHashCode()方法实现的，该方法实际上总是用一个AtomicInteger加上0x61c88647来实现的。0x61c88647这个数是有特殊意义的，它能够保证hash表的每个散列桶能够均匀的分布，这是`Fibonacci Hashing`，关于更多介绍可以看[这篇文章的threadLocal散列值部分](https://www.cnblogs.com/zhangjk1993/archive/2017/03/29/6641745.html)。也正是能够均匀分布，所以threadLocal选择使用开放地址法来解决hash冲突的问题。
+	从源码中我们可以清楚的看到threadLocal实例的hashCode是通过nextHashCode()方法实现的，该方法实际上总是用一个AtomicInteger加上0x61c88647来实现的。0x61c88647这个数是有特殊意义的，它能够保证hash表的每个散列桶能够均匀的分布，这是`Fibonacci Hashing`，关于更多介绍可以看[这篇文章的threadLocal散列值部分](https://www.cnblogs.com/zhangjk1993/archive/2017/03/29/6641745.html) 。也正是能够均匀分布，所以threadLocal选择使用开放地址法来解决hash冲突的问题。
 
 2. 怎样确定新值插入到哈希表中的位置？
 	
@@ -426,7 +426,7 @@ getEntry方法源码为：
 
 > 参考资料
 
-《java高并发程序设计》
-[这篇文章的threadLocalMap讲解和threadLocal的hashCode讲解不错](https://www.cnblogs.com/zhangjk1993/archive/2017/03/29/6641745.html)
-[这篇文章讲解了hash，不错](http://faculty.cs.niu.edu/~freedman/340/340notes/340hash.htm)
-[解决hash冲突 链地址法和开放地址法的比较](http://www.nowamagic.net/academy/detail/3008060)
+- 《java高并发程序设计》
+- [这篇文章的threadLocalMap讲解和threadLocal的hashCode讲解不错](https://www.cnblogs.com/zhangjk1993/archive/2017/03/29/6641745.html)
+- [这篇文章讲解了hash，不错](http://faculty.cs.niu.edu/~freedman/340/340notes/340hash.htm)
+- [解决hash冲突 链地址法和开放地址法的比较](http://www.nowamagic.net/academy/detail/3008060)

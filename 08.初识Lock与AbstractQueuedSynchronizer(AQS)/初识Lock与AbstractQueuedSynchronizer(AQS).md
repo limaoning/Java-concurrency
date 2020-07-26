@@ -4,7 +4,7 @@
 ![concurrent目录结构.png](http://upload-images.jianshu.io/upload_images/2615789-da951eb99c5dabfd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-其中包含了两个子包：atomic以及lock，另外在concurrent下的阻塞队列以及executors,这些就是concurrent包中的精华，之后会一一进行学习。而这些类的实现主要是依赖于volatile以及CAS（关于volatile可以看[这篇文章](https://juejin.im/post/5ae9b41b518825670b33e6c4)，关于CAS可以看[这篇文章的3.1节](https://juejin.im/post/5ae6dc04f265da0ba351d3ff)），从整体上来看concurrent包的整体实现图如下图所示：
+其中包含了两个子包：atomic以及lock，另外在concurrent下的阻塞队列以及executors,这些就是concurrent包中的精华，之后会一一进行学习。而这些类的实现主要是依赖于volatile以及CAS（关于volatile可以看[这篇文章](https://juejin.im/post/5ae9b41b518825670b33e6c4) ，关于CAS可以看[这篇文章的3.1节](https://juejin.im/post/5ae6dc04f265da0ba351d3ff) ），从整体上来看concurrent包的整体实现图如下图所示：
 
 ![concurrent包实现整体示意图.png](http://upload-images.jianshu.io/upload_images/2615789-24da822ddc226b03.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -26,11 +26,13 @@
 
 我们现在就来看看lock接口定义了哪些方法：
 
+```
 > void lock(); //获取锁
 > void lockInterruptibly() throws InterruptedException；//获取锁的过程能够响应中断
 > boolean tryLock();//非阻塞式响应中断能立即返回，获取锁放回true反之返回fasle
 > boolean tryLock(long time, TimeUnit unit) throws InterruptedException;//超时获取锁，在超时内或者未中断的情况下能够获取锁
 > Condition newCondition();//获取与lock绑定的等待通知组件，当前线程必须获得了锁才能进行等待，进行等待时会先释放锁，当再次获取锁时才能从等待中返回
+```
 
 上面是lock接口下的五个方法，也只是从源码中英译中翻译了一遍，感兴趣的可以自己的去看看。那么在locks包下有哪些类实现了该接口了？先从最熟悉的ReentrantLock说起。
 
@@ -236,7 +238,7 @@ MutexDemo：
 
 而对AQS来说，只需要同步组件返回的true和false即可，因为AQS会对true和false会有不同的操作，true会认为当前线程获取同步组件成功直接返回，而false的话就AQS也会将当前线程插入同步队列等一系列的方法。
 
-总的来说，同步组件通过重写AQS的方法实现自己想要表达的同步语义，而AQS只需要同步组件表达的true和false即可，AQS会针对true和false不同的情况做不同的处理，至于底层实现，可以[看这篇文章](http://www.jianshu.com/p/cc308d82cc71)。
+总的来说，同步组件通过重写AQS的方法实现自己想要表达的同步语义，而AQS只需要同步组件表达的true和false即可，AQS会针对true和false不同的情况做不同的处理，至于底层实现，可以[看这篇文章](http://www.jianshu.com/p/cc308d82cc71) 。
 
 
 
